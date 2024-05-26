@@ -31,9 +31,16 @@ export const setupServer = () => {
 
   app.get('/contacts/:contactId', async (req, res) => {
     const { contactId } = req.params;
-    const contact = await getContactById(contactId);
 
-    console.log('contact: ', contact);
+    const id = contactId.split('');
+    if (id.length !== 24) {
+      return res.status(400).json({
+        status: 400,
+        message: `id ${contactId} not correct!`,
+      });
+    }
+
+    const contact = await getContactById(contactId);
 
     if (!contact) {
       return res.status(404).json({
