@@ -36,7 +36,7 @@ export const setupServer = () => {
     if (id.length !== DATABASE_PARAMS.ID_LENGTH) {
       return res.status(400).json({
         status: 400,
-        message: `id ${contactId} not correct!`,
+        message: `id ${contactId} is not correct!`,
       });
     }
 
@@ -45,7 +45,7 @@ export const setupServer = () => {
     if (!contact) {
       return res.status(404).json({
         status: 404,
-        message: `Contact with id ${contactId} not found!`,
+        message: `Contact with id ${contactId} is not found!`,
       });
     }
 
