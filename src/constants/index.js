@@ -5,3 +5,7 @@ export const ENV_VARS = {
   MONGODB_URL: 'MONGODB_URL',
   MONGODB_DB: 'MONGODB_DB',
 };
+
+export const DATABASE_PARAMS = {
+  ID_LENGTH: 24,
+};

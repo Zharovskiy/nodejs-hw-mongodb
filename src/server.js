@@ -2,7 +2,7 @@ import express from 'express';
 import pino from 'pino-http';
 import cors from 'cors';
 import { env } from './utils/env.js';
-import { ENV_VARS } from './constants/index.js';
+import { DATABASE_PARAMS, ENV_VARS } from './constants/index.js';
 import { notFoundMiddleware } from './middlewares/notFoundMiddleware.js';
 import { errorHandlerMiddleware } from './middlewares/errorHandlerMiddleware.js';
 import { getAllContacts, getContactById } from './services/contacts.js';
@@ -33,7 +33,7 @@ export const setupServer = () => {
     const { contactId } = req.params;
 
     const id = contactId.split('');
-    if (id.length !== 24) {
+    if (id.length !== DATABASE_PARAMS.ID_LENGTH) {
       return res.status(400).json({
         status: 400,
         message: `id ${contactId} not correct!`,
