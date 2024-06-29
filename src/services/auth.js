@@ -3,7 +3,13 @@ import { Users } from "../db/models/user.js";
 import bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
 import { Sessions } from "../db/models/session.js";
-import { FIFTEEN_MINUTES, THIRTY_DAYS } from "../constants/index.js";
+import { ENV_VARS, FIFTEEN_MINUTES, SMTP, TEMPLATES_DIR, THIRTY_DAYS } from "../constants/index.js";
+import jwt from 'jsonwebtoken';
+import { env } from "../utils/env.js";
+import { sendEmail } from "../utils/sendMail.js";
+import handlebars from 'handlebars';
+import path from 'node:path';
+import fs from 'node:fs/promises';
 
 const createSession = () => {
   const accessToken = randomBytes(30).toString('base64');
@@ -82,3 +88,41 @@ export const refreshSession = async ({ sessionId, refreshToken }) => {
     });
 };
 
+export const requestResetToken = async (email) => {
+  const user = await Users.findOne({ email });
+  if (!user) {
+    throw createHttpError(404, 'User not found');
+  }
+  const resetToken = jwt.sign(
+    {
+      sub: user._id,
+      email,
+    },
+    env(SMTP.JWT_SECRET),
+    {
+      expiresIn: '15m',
+    },
+  );
+
+  const resetPasswordTemplatePath = path.join(
+    TEMPLATES_DIR,
+    'reset-password-email.html',
+  );
+
+  const templateSource = (
+    await fs.readFile(resetPasswordTemplatePath)
+  ).toString();
+
+  const template = handlebars.compile(templateSource);
+  const html = template({
+    name: user.name,
+    link: `${env(ENV_VARS.APP_DOMAIN)}/reset-password?token=${resetToken}`,
+  });
+
+  await sendEmail({
+    from: env(SMTP.SMTP_FROM),
+    to: email,
+    subject: 'Reset your password',
+    html,
+  });
+};
