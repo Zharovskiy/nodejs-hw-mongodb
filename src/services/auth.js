@@ -100,7 +100,7 @@ export const requestResetToken = async (email) => {
     },
     env(SMTP.JWT_SECRET),
     {
-      expiresIn: '15m',
+      expiresIn: '5m',
     },
   );
 
@@ -116,13 +116,48 @@ export const requestResetToken = async (email) => {
   const template = handlebars.compile(templateSource);
   const html = template({
     name: user.name,
-    link: `${env(ENV_VARS.APP_DOMAIN)}/reset-password?token=${resetToken}`,
+    link: `${env(ENV_VARS.APP_DOMAIN)}/auth/reset-password?token=${resetToken}`,
   });
 
-  await sendEmail({
-    from: env(SMTP.SMTP_FROM),
-    to: email,
-    subject: 'Reset your password',
-    html,
+  try {
+    await sendEmail({
+      from: env(SMTP.SMTP_FROM),
+      to: email,
+      subject: 'Reset your password',
+      html,
+    });
+  } catch (err) {
+    if (err instanceof Error) throw createHttpError(500, "Failed to send the email, please try again later.");
+    throw err;
+  }
+  
+};
+
+export const resetPassword = async (payload) => {
+  let entries;
+
+  try {
+    entries = jwt.verify(payload.token, env(SMTP.JWT_SECRET));
+  } catch (err) {
+    if (err instanceof Error) throw createHttpError(401, "Token is expired or invalid.");
+    throw err;
+  }
+
+  const user = await Users.findOne({
+    email: entries.email,
+    _id: entries.sub,
   });
+
+  if (!user) {
+    throw createHttpError(404, 'User not found');
+  }
+
+  const encryptedPassword = await bcrypt.hash(payload.password, 10);
+
+  await Users.updateOne(
+    { _id: user._id },
+    { password: encryptedPassword },
+  );
+
+  await Sessions.deleteOne({ userId: user._id });
 };
