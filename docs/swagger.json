@@ -86,8 +86,7 @@
                 "type": "object",
                 "required": [
                   "name",
-                  "phoneNumber",
-                  "userId"
+                  "phoneNumber"
                 ],
                 "properties": {
                   "name": {
@@ -115,14 +114,10 @@
                     "type": "string",
                     "example": "example@gmail.com"
                   },
-                  "userId": {
-                    "description": "Contact's user id",
-                    "type": "string",
-                    "example": "65e4decdd286b30065d54af9"
-                  },
                   "photo": {
                     "description": "Link to contact's photo",
                     "type": "string",
+                    "format": "binary",
                     "example": "<https://res.cloudinary.com/uqwgdu/image/upload/image.png>"
                   }
                 }
@@ -242,8 +237,8 @@
         ],
         "parameters": [
           {
-            "name": "id",
             "in": "path",
+            "name": "id",
             "required": true,
             "description": "ID of the contact to update",
             "schema": {
@@ -284,14 +279,10 @@
                     "type": "string",
                     "example": "example@gmail.com"
                   },
-                  "userId": {
-                    "description": "Contact's user id",
-                    "type": "string",
-                    "example": "65e4decdd286b30065d54af9"
-                  },
                   "photo": {
                     "description": "Link to contact's photo",
                     "type": "string",
+                    "format": "binary",
                     "example": "<https://res.cloudinary.com/uqwgdu/image/upload/image.png>"
                   }
                 }
@@ -331,6 +322,9 @@
           },
           "401": {
             "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
           }
         }
       },

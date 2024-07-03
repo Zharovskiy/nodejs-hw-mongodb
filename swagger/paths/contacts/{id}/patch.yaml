@@ -37,13 +37,10 @@ requestBody:
             description: "Contact's email"
             type: string
             example: example@gmail.com
-          userId:
-            description: "Contact's user id"
-            type: string
-            example: 65e4decdd286b30065d54af9
           photo:
             description: "Link to contact's photo"
             type: string
+            format: binary
             example: <https://res.cloudinary.com/uqwgdu/image/upload/image.png>
 responses:
   '200':
@@ -68,3 +65,5 @@ responses:
               $ref: '../../../components/schemas/contact.yaml'
   '401':
     $ref: '../../../components/responses/401.yaml'
+  '404':
+    $ref: '../../../components/responses/404.yaml'
